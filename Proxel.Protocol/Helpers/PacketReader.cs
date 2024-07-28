@@ -35,7 +35,7 @@ namespace Proxel.Protocol.Helpers
         public static ushort ReadUnsignedShort(Stream stream)
         {
             byte[] data = new byte[2];
-            ushort read = (ushort)stream.Read(data, 0, 2);
+            int read = stream.Read(data, 0, 2);
             if (read != 2)
             {
                 throw new Exception("Unexpected end of stream.");

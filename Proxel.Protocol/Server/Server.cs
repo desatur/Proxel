@@ -7,6 +7,8 @@ using System.Text;
 using Newtonsoft.Json;
 using Proxel.Protocol.Types;
 using Proxel.Protocol.Helpers;
+using System.Reflection.PortableExecutable;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Proxel.Protocol.Server
 {
@@ -44,7 +46,7 @@ namespace Proxel.Protocol.Server
 
         private static async Task HandleClientAsync(TcpClient client)
         {
-            using (NetworkStream networkStream = client.GetStream())
+            using (var networkStream = client.GetStream())
             {
                 try
                 {
@@ -87,7 +89,7 @@ namespace Proxel.Protocol.Server
         {
             BinaryReader packetReader = new(new MemoryStream(packet.Data));
             int protocolVersion = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
-            string serverAddress = await PacketString.ReadStringAsync(packetReader.BaseStream);
+            string serverAddress = await FieldReader.ReadStringAsync(packetReader.BaseStream);
             ushort serverPort = PacketReader.ReadUnsignedShort(packetReader.BaseStream);
             int nextState = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
             Console.WriteLine($"HandleHandshakeAsync >> Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}");
@@ -107,57 +109,19 @@ namespace Proxel.Protocol.Server
 
         private static async Task HandleLoginRequestAsync(NetworkStream networkStream)
         {
-            string username = "";
-            string uuid = "";
-            try // TODO: Fix handling Login packet sent by client to server, ~~I have made a workaround for my account~~
+            string userName = "";
+            string userUuid = "";
+
+            Packet packet = await PacketReader.ReadPacketAsync(networkStream);
+
+            using (BinaryReader reader = new(new MemoryStream(packet.Data)))
             {
-                // Read the entire string data
-                string stringData = await PacketString.ReadStringAsync(networkStream);
-                byte[] data = Encoding.UTF8.GetBytes(stringData);
-
-                if (data.Length < 16)
-                {
-                    throw new InvalidOperationException("Received data is too short to contain a valid UUID.");
-                }
-
-                // Extract UUID (last 16 bytes of the data)
-                byte[] uuidBytes = new byte[16];
-                Array.Copy(data, data.Length - 16, uuidBytes, 0, 16);
-
-                // Extract Username (remaining bytes before the UUID)
-                byte[] usernameBytes = new byte[data.Length - 16];
-                Array.Copy(data, 0, usernameBytes, 0, usernameBytes.Length);
-
-                // Decode UUID and Username
-                uuid = "";
-                username = Encoding.UTF8.GetString(usernameBytes);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error reading username and UUID: {ex.Message}");
-                return;
+                userName = await FieldReader.ReadStringAsync(reader.BaseStream);
+                userUuid = await FieldReader.ReadUuidAsync(reader.BaseStream);
             }
 
-            Console.WriteLine($"HandleLoginRequestAsync >> User: {username} UUID: {uuid}");
-
-            var dc = new
-            {
-                text = "Disconnect reason!"
-            };
-
-            using (var ms = new MemoryStream())
-            using (var writer = new BinaryWriter(ms))
-            {
-                try
-                {
-                    byte[] data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dc));
-                    //await Packet.SendMcPacketDataToClientAsync(networkStream, 0x00, data);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error sending login success packet: {ex.Message}");
-                }
-            }
+            Console.WriteLine("HandleLoginRequestAsync >> LoginRequest data:\n" + "");
+            Console.WriteLine($"HandleLoginRequestAsync >> User: {userName} UUID: {userUuid}");
         }
         private static async Task HandleStatusRequestAsync(NetworkStream networkStream)
         {
