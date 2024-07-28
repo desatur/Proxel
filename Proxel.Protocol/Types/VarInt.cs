@@ -38,11 +38,11 @@ namespace Proxel.Protocol.Types
             {
                 if ((value & ~SEGMENT_BITS) == 0)
                 {
-                    await stream.WriteAsync(new[] { (byte)value }, 0, 1);
+                    await stream.WriteAsync([(byte)value], 0, 1);
                     return;
                 }
                 byte toWrite = (byte)((value & SEGMENT_BITS) | CONTINUE_BIT);
-                await stream.WriteAsync(new[] { toWrite }, 0, 1);
+                await stream.WriteAsync([toWrite], 0, 1);
                 value >>= 7;
             }
         }
@@ -56,22 +56,6 @@ namespace Proxel.Protocol.Types
                 size++;
             } while (value != 0);
             return size;
-        }
-    }
-
-    public static class StreamExtensions
-    {
-        public static async Task<int> ReadByteAsync(this Stream stream)
-        {
-            byte[] buffer = new byte[1];
-            int read = await stream.ReadAsync(buffer, 0, 1);
-            return read == 0 ? -1 : buffer[0];
-        }
-
-        public static async Task WriteByteAsync(this Stream stream, byte value)
-        {
-            byte[] buffer = new byte[1] { value };
-            await stream.WriteAsync(buffer, 0, 1);
         }
     }
 }

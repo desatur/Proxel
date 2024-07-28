@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using System;
 using System.Text;
+using Proxel.Protocol.Helpers;
+using System.Net.Sockets;
 
 namespace Proxel.Protocol.Types
 {
@@ -9,28 +11,14 @@ namespace Proxel.Protocol.Types
     {
         public static async Task<string> ReadStringAsync(Stream stream)
         {
-            McPacket packet = await McPacket.ReadPacketAsync(stream);
-            Stream packetStream = await McPacket.CreatePacketStream(packet);
-
-            int length = await VarInt.ReadVarIntAsync(packetStream);
-            if (length < 0 || length > 32767 * 3 + 3)
+            int length = await VarInt.ReadVarIntAsync(stream);
+            byte[] data = new byte[length];
+            int read = stream.Read(data, 0, length);
+            if (read != length)
             {
-                throw new InvalidOperationException("Invalid string length.");
+                throw new Exception("Unexpected end of stream.");
             }
-
-            byte[] buffer = new byte[length];
-            int bytesRead = 0;
-
-            while (bytesRead < length)
-            {
-                int read = await packetStream.ReadAsync(buffer, bytesRead, length - bytesRead);
-                if (read == 0)
-                {
-                    throw new EndOfStreamException("Unexpected end of stream while reading string.");
-                }
-                bytesRead += read;
-            }
-            return Encoding.UTF8.GetString(buffer, 0, length);
+            return Encoding.UTF8.GetString(data);
         }
 
         public static async Task WriteStringAsync(Stream stream, string value)

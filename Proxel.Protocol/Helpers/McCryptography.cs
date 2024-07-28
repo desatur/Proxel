@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace Proxel.Protocol
+namespace Proxel.Protocol.Helpers
 {
     public static class McCryptography
     {

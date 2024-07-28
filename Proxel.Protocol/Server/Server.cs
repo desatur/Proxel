@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Text;
 using Newtonsoft.Json;
 using Proxel.Protocol.Types;
+using Proxel.Protocol.Helpers;
 
 namespace Proxel.Protocol.Server
 {
@@ -58,10 +59,10 @@ namespace Proxel.Protocol.Server
 
         public static async Task HandlePacketAsync(NetworkStream stream)
         {
-            McPacket packet;
+            Packet packet;
             try
             {
-                packet = await McPacket.ReadPacketAsync(stream);
+                packet = await PacketReader.ReadPacketAsync(stream);
             }
             catch (Exception ex)
             {
@@ -82,28 +83,25 @@ namespace Proxel.Protocol.Server
             }
         }
 
-        private static async Task HandleHandshakeAsync(McPacket packet, NetworkStream networkStream)
+        private static async Task HandleHandshakeAsync(Packet packet, NetworkStream networkStream)
         {
-            using (var stream = new MemoryStream(packet.Data))
-            using (var reader = new BinaryReader(stream))
-            {
-                int protocolVersion = await VarInt.ReadVarIntAsync(reader.BaseStream);
-                string serverAddress = await PacketString.ReadStringAsync(reader.BaseStream);
-                ushort serverPort = reader.ReadUInt16();
-                int nextState = await VarInt.ReadVarIntAsync(reader.BaseStream);
-                Console.WriteLine($"HandleHandshakeAsync >> Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}");
+            BinaryReader packetReader = new(new MemoryStream(packet.Data));
+            int protocolVersion = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
+            string serverAddress = await PacketString.ReadStringAsync(packetReader.BaseStream);
+            ushort serverPort = PacketReader.ReadUnsignedShort(packetReader.BaseStream);
+            int nextState = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
+            Console.WriteLine($"HandleHandshakeAsync >> Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}");
 
-                switch (nextState)
-                {
-                    case 1: // Status TODO: Reimplement status
-                        await HandleStatusRequestAsync(networkStream);
-                        break;
-                    case 2: // Login
-                        await HandleLoginRequestAsync(networkStream);
-                        break;
-                    default:
-                        throw new NotSupportedException($"Unsupported next state: {nextState}");
-                }
+            switch (nextState)
+            {
+                case 1: // Status
+                    await HandleStatusRequestAsync(networkStream);
+                    break;
+                case 2: // Login
+                    await HandleLoginRequestAsync(networkStream);
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported next state: {nextState}");
             }
         }
 
@@ -131,7 +129,7 @@ namespace Proxel.Protocol.Server
                 Array.Copy(data, 0, usernameBytes, 0, usernameBytes.Length);
 
                 // Decode UUID and Username
-                uuid = GuidConverter.ToString(new Guid(uuidBytes));
+                uuid = "";
                 username = Encoding.UTF8.GetString(usernameBytes);
             }
             catch (Exception ex)
@@ -153,7 +151,7 @@ namespace Proxel.Protocol.Server
                 try
                 {
                     byte[] data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dc));
-                    await McPacket.SendMcPacketDataToClientAsync(networkStream, 0x00, data);
+                    //await Packet.SendMcPacketDataToClientAsync(networkStream, 0x00, data);
                 }
                 catch (Exception ex)
                 {
@@ -164,8 +162,8 @@ namespace Proxel.Protocol.Server
         private static async Task HandleStatusRequestAsync(NetworkStream networkStream)
         {
             // Status Request from client
-            int length = await VarInt.ReadVarIntAsync(networkStream);
-            int packetId = await VarInt.ReadVarIntAsync(networkStream);
+            int length = await VarInt.ReadVarIntAsync(networkStream); // Should be 1
+            int packetId = await VarInt.ReadVarIntAsync(networkStream); // Should be 0
             if (length == 1 && packetId == 0)
             {
                 Console.WriteLine($"HandleStatusRequestAsync >> Status Request detected!");
@@ -173,34 +171,10 @@ namespace Proxel.Protocol.Server
             else return;
 
             // Status Response to client
-            //string statusString = JsonConvert.SerializeObject(File.ReadAllText(@"D:\testMOTD.txt"));
-            byte[] data = File.ReadAllBytes(@"D:\testMOTD.txt"); /*Encoding.UTF8.GetBytes(statusString);*/
+            byte[] data = File.ReadAllBytes(@"D:\testMOTD.txt");
             Console.WriteLine($"HandleStatusRequestAsync >> statusJson:\n{Encoding.UTF8.GetString(data)}\n--- END ---");
-            await McPacket.SendMcPacketDataToClientAsync(networkStream, 0x00, data);
+            
             Console.WriteLine($"HandleStatusRequestAsync >> Sent Status");
-
-            try
-            {
-                // Ping?
-                int pingPacketLength = await VarInt.ReadVarIntAsync(networkStream);
-                int pingPacketId = await VarInt.ReadVarIntAsync(networkStream);
-                if (pingPacketId == 0x01)
-                {
-                    byte[] payload = new byte[pingPacketLength - 1]; // subtract 1 for the packet ID byte
-                    await networkStream.ReadAsync(payload, 0, payload.Length);
-                    await McPacket.SendMcPacketDataToClientAsync(networkStream, 0x01, payload);
-                    Console.WriteLine($"HandleStatusRequestAsync >> Sent Ping Response");
-                }
-                else
-                {
-                    Console.WriteLine($"HandleStatusRequestAsync >> Unexpected Packet ID: {pingPacketId}");
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            //Console.WriteLine($"HandleStatusRequestAsync >> Len: {ping.Length} PacketID: {ping.PacketId} (Ping)");
         }
     }
 }
