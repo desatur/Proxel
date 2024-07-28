@@ -46,7 +46,7 @@ namespace Proxel.Protocol
         {
             var stream = new MemoryStream();
 
-            byte[] lengthBuffer = new byte[0];
+            byte[] lengthBuffer = [];
             int lengthFieldSize = VarInt.GetVarIntSize(packet.Length);
             int packetLength = packet.Length;
             using (var lengthStream = new MemoryStream())
