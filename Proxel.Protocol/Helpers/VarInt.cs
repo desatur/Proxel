@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Proxel.Protocol.Types
+namespace Proxel.Protocol.Helpers
 {
     public static class VarInt
     {
@@ -41,7 +41,7 @@ namespace Proxel.Protocol.Types
                     await stream.WriteAsync([(byte)value], 0, 1);
                     return;
                 }
-                byte toWrite = (byte)((value & SEGMENT_BITS) | CONTINUE_BIT);
+                byte toWrite = (byte)(value & SEGMENT_BITS | CONTINUE_BIT);
                 await stream.WriteAsync([toWrite], 0, 1);
                 value >>= 7;
             }

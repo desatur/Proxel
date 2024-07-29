@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System;
-using Proxel.Protocol.Types;
 using System.Text;
 using System.Threading.Tasks;
 

@@ -9,7 +9,7 @@ namespace Proxel
         static async Task Main(string[] args)
         {
             Server server = new Server(IPAddress.Any);
-            await server.StartAsync();
+            await server.Start();
         }
     }
 }

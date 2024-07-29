@@ -4,8 +4,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Text;
-using Proxel.Protocol.Types;
 using Proxel.Protocol.Helpers;
+using Proxel.Protocol.Packets;
+using Proxel.Protocol.Packets.Utils;
 
 namespace Proxel.Protocol.Server
 {
@@ -61,7 +62,7 @@ namespace Proxel.Protocol.Server
             Packet packet;
             try
             {
-                packet = await PacketReader.ReadPacketAsync(stream);
+                packet = await Packet.ReadPacketAsync(stream);
             }
             catch (Exception ex)
             {
@@ -117,7 +118,7 @@ namespace Proxel.Protocol.Server
             byte[] status = File.ReadAllBytes(@"D:\testMOTD.txt"); // TODO: Do un-hardcode this, but PLEASE DO NOT use strings :pray:
 
             Console.WriteLine($"HandleStatusRequestAsync >> statusJson:\n{Encoding.UTF8.GetString(status)}\n--- END ---");
-            await PacketWriter.WriteStringPacketAsync(networkStream, 0, status);
+            await PacketWriter.WriteStringPacketAsync(networkStream, 0x00, status);
 
             Console.WriteLine($"HandleStatusRequestAsync >> Sent Status");
         }
@@ -128,7 +129,7 @@ namespace Proxel.Protocol.Server
             string userUuid = "";
             byte[] sharedSecret = [];
 
-            Packet userDataPacket = await PacketReader.ReadPacketAsync(networkStream);
+            Packet userDataPacket = await Packet.ReadPacketAsync(networkStream);
             using (BinaryReader reader = new(new MemoryStream(userDataPacket.Data)))
             {
                 userName = await FieldReader.ReadStringAsync(reader.BaseStream);

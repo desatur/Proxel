@@ -1,10 +1,10 @@
-﻿using Proxel.Protocol.Types;
+﻿using Proxel.Protocol.Helpers;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Proxel.Protocol.Helpers
+namespace Proxel.Protocol.Packets.Utils
 {
-    public class PacketWriter
+    public static class PacketWriter
     {
         public static async Task WritePacketAsync(Stream stream, Packet packet)
         {
