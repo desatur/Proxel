@@ -4,11 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Text;
-using Newtonsoft.Json;
 using Proxel.Protocol.Types;
 using Proxel.Protocol.Helpers;
-using System.Reflection.PortableExecutable;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Proxel.Protocol.Server
 {
@@ -90,7 +87,7 @@ namespace Proxel.Protocol.Server
             BinaryReader packetReader = new(new MemoryStream(packet.Data));
             int protocolVersion = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
             string serverAddress = await FieldReader.ReadStringAsync(packetReader.BaseStream);
-            ushort serverPort = PacketReader.ReadUnsignedShort(packetReader.BaseStream);
+            ushort serverPort = FieldReader.ReadUnsignedShort(packetReader.BaseStream);
             int nextState = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
             Console.WriteLine($"HandleHandshakeAsync >> Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}");
 
@@ -107,22 +104,6 @@ namespace Proxel.Protocol.Server
             }
         }
 
-        private static async Task HandleLoginRequestAsync(NetworkStream networkStream)
-        {
-            string userName = "";
-            string userUuid = "";
-
-            Packet packet = await PacketReader.ReadPacketAsync(networkStream);
-
-            using (BinaryReader reader = new(new MemoryStream(packet.Data)))
-            {
-                userName = await FieldReader.ReadStringAsync(reader.BaseStream);
-                userUuid = await FieldReader.ReadUuidAsync(reader.BaseStream);
-            }
-
-            Console.WriteLine("HandleLoginRequestAsync >> LoginRequest data:\n" + "");
-            Console.WriteLine($"HandleLoginRequestAsync >> User: {userName} UUID: {userUuid}");
-        }
         private static async Task HandleStatusRequestAsync(NetworkStream networkStream)
         {
             // Status Request from client
@@ -134,11 +115,34 @@ namespace Proxel.Protocol.Server
             }
             else return;
 
-            // Status Response to client
-            byte[] data = File.ReadAllBytes(@"D:\testMOTD.txt");
-            Console.WriteLine($"HandleStatusRequestAsync >> statusJson:\n{Encoding.UTF8.GetString(data)}\n--- END ---");
-            
+            byte[] status = File.ReadAllBytes(@"D:\testMOTD.txt");
+
+            Console.WriteLine($"HandleStatusRequestAsync >> statusJson:\n{Encoding.UTF8.GetString(status)}\n--- END ---");
+            await PacketWriter.WriteStringPacketAsync(networkStream, 0, status);
+
             Console.WriteLine($"HandleStatusRequestAsync >> Sent Status");
+        }
+
+        private static async Task HandleLoginRequestAsync(NetworkStream networkStream)
+        {
+            string userName = "";
+            string userUuid = "";
+
+            byte[] sharedSecret = [];
+
+            Packet userDataPacket = await PacketReader.ReadPacketAsync(networkStream);
+            using (BinaryReader reader = new(new MemoryStream(userDataPacket.Data)))
+            {
+                userName = await FieldReader.ReadStringAsync(reader.BaseStream);
+                userUuid = await FieldReader.ReadUuidAsync(reader.BaseStream);
+            }
+            Console.WriteLine("HandleLoginRequestAsync >> LoginRequest data:\n" + "");
+            Console.WriteLine($"HandleLoginRequestAsync >> User: {userName} UUID: {userUuid}");
+
+            using (BinaryWriter writer = new(new MemoryStream()))
+            {
+
+            }
         }
     }
 }

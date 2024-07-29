@@ -48,5 +48,32 @@ namespace Proxel.Protocol.Helpers
             ulong leastSigBits = BitConverter.ToUInt64(uuidBytes, 8);
             return FormatUuid(mostSigBits, leastSigBits);
         }
+        public static ushort ReadUnsignedShort(Stream stream)
+        {
+            byte[] data = new byte[2];
+            int read = stream.Read(data, 0, 2);
+            if (read != 2)
+            {
+                throw new Exception("Unexpected end of stream.");
+            }
+            return (ushort)((data[0] << 8) | data[1]);
+        }
+
+        public static async Task<byte[]> ReadByteArrayAsync(Stream stream)
+        {
+            int length = await VarInt.ReadVarIntAsync(stream);
+            byte[] data = new byte[length];
+            int bytesRead = 0;
+            while (bytesRead < length)
+            {
+                int read = await stream.ReadAsync(data, bytesRead, length - bytesRead);
+                if (read == 0)
+                {
+                    throw new IOException("Unexpected end of stream.");
+                }
+                bytesRead += read;
+            }
+            return data;
+        }
     }
 }

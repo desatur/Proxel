@@ -1,7 +1,5 @@
 ﻿using Proxel.Protocol.Types;
-using System;
 using System.IO;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Proxel.Protocol.Helpers
@@ -31,16 +29,6 @@ namespace Proxel.Protocol.Helpers
                 data = [];
             }
             return new Packet(packetId, data);
-        }
-        public static ushort ReadUnsignedShort(Stream stream)
-        {
-            byte[] data = new byte[2];
-            int read = stream.Read(data, 0, 2);
-            if (read != 2)
-            {
-                throw new Exception("Unexpected end of stream.");
-            }
-            return (ushort)((data[0] << 8) | data[1]);
         }
     }
 }
