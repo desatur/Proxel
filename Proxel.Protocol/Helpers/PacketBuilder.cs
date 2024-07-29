@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Proxel.Protocol.Helpers
 {
@@ -130,13 +131,13 @@ namespace Proxel.Protocol.Helpers
             }
         }
 
-        public void Send()
+        public async Task Send()
         {
             byte[] packetBytes = GetPacketBytes();
-            _networkStream.Write(packetBytes, 0, packetBytes.Length);
+            await _networkStream.WriteAsync(packetBytes, 0, packetBytes.Length);
         }
 
-        public void DisposeAsync()
+        public void Dispose()
         {
             _writer?.Dispose();
             _memoryStream?.Dispose();

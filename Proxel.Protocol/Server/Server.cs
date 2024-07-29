@@ -114,7 +114,7 @@ namespace Proxel.Protocol.Server
             }
             else return;
 
-            byte[] status = File.ReadAllBytes(@"D:\testMOTD.txt");
+            byte[] status = File.ReadAllBytes(@"D:\testMOTD.txt"); // TODO: Do un-hardcode this, but PLEASE DO NOT use strings :pray:
 
             Console.WriteLine($"HandleStatusRequestAsync >> statusJson:\n{Encoding.UTF8.GetString(status)}\n--- END ---");
             await PacketWriter.WriteStringPacketAsync(networkStream, 0, status);
@@ -126,7 +126,6 @@ namespace Proxel.Protocol.Server
         {
             string userName = "";
             string userUuid = "";
-
             byte[] sharedSecret = [];
 
             Packet userDataPacket = await PacketReader.ReadPacketAsync(networkStream);
@@ -143,7 +142,7 @@ namespace Proxel.Protocol.Server
                 builder.WriteUuid(userUuid);
                 builder.WriteString(userName);
                 builder.WriteVarInt(2);
-                builder.Send();
+                await builder.Send();
             }
         }
 
