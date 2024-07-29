@@ -7,6 +7,8 @@ using System.Text;
 using Proxel.Protocol.Helpers;
 using Proxel.Protocol.Packets;
 using Proxel.Protocol.Packets.Utils;
+using Proxel.Protocol.Enums;
+using System.Collections.Generic;
 
 namespace Proxel.Protocol.Server
 {
@@ -53,7 +55,7 @@ namespace Proxel.Protocol.Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error handling TcpClient: {ex.Message}");
+                Console.WriteLine($"Error handling TcpClient: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
@@ -90,6 +92,7 @@ namespace Proxel.Protocol.Server
             ushort serverPort = FieldReader.ReadUnsignedShort(packetReader.BaseStream);
             int nextState = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
             Console.WriteLine($"HandleHandshakeAsync >> Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}");
+            await ProtocolCheck(protocolVersion, networkStream);
 
             switch (nextState)
             {
@@ -101,6 +104,26 @@ namespace Proxel.Protocol.Server
                     break;
                 default:
                     throw new NotSupportedException($"Unsupported next state: {nextState}");
+            }
+        }
+
+        private static async Task ProtocolCheck(int protocolVersion, NetworkStream networkStream)
+        {
+            List<ProtocolVersion> protocolVersions = ProtocolVersionUtils.GetProtocolVersion(protocolVersion);
+            if (protocolVersions == null || protocolVersions.Count == 0)
+            {
+                using (var textBuilder = new TextBuilder()) // Build disconnect text
+                {
+                    textBuilder.Text = $"Unsupported version! ({protocolVersion})";
+                    textBuilder.Bold = true;
+                    //Console.WriteLine($"JSON: {textBuilder.GetFinalJson()}");
+                    using (var builder = new PacketBuilder(networkStream)) // Disconnect with reason
+                    {
+                        builder.SetPacketID(0x00);
+                        builder.WriteString(textBuilder.GetFinalJson());
+                        await builder.Send();
+                    }
+                }
             }
         }
 
