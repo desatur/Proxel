@@ -9,9 +9,10 @@ using Proxel.Protocol.Helpers;
 
 namespace Proxel.Protocol.Server
 {
-    public class Server
+    public class Server : IAsyncDisposable
     {
         private readonly TcpListener _listener;
+        public bool Initiated { get; private set; }
 
         public Server(IPAddress ipAddress = null, ushort port = 25565)
         {
@@ -22,18 +23,13 @@ namespace Proxel.Protocol.Server
             #endif
             _listener = new TcpListener(ipAddress, port);
         }
+        ~Server() { DisposeAsync().AsTask().Wait(); }
 
-        ~Server() 
-        { 
-            _listener.Stop();
-            Console.WriteLine($"Server running on {_listener.LocalEndpoint} has stopped");
-        }
-
-        public async Task StartAsync()
+        public async Task Start()
         {
             _listener.Start();
+            Initiated = true;
             Console.WriteLine($"Server started on {_listener.LocalEndpoint}");
-
             while (true)
             {
                 TcpClient client = await _listener.AcceptTcpClientAsync();
@@ -41,18 +37,22 @@ namespace Proxel.Protocol.Server
             }
         }
 
+        public async Task Stop()
+        {
+            _listener.Stop();
+            Initiated = false;
+            Console.WriteLine($"Server running on {_listener.LocalEndpoint} has stopped");
+        }
+
         private static async Task HandleClientAsync(TcpClient client)
         {
-            using (var networkStream = client.GetStream())
+            try
             {
-                try
-                {
-                    await HandlePacketAsync(networkStream);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error handling client: {ex.Message}");
-                }
+                await HandlePacketAsync(client.GetStream());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error handling TcpClient: {ex.Message}");
             }
         }
 
@@ -76,8 +76,7 @@ namespace Proxel.Protocol.Server
                     break;
                 default:
                     string msg = $"Unsupported packet ID: {packet.PacketId} (HEX: {packet.PacketId:X2})";
-                    string hexString = BitConverter.ToString(packet.Data).Replace("-", " ");
-                    Console.WriteLine(msg + "\n----- DATA -----\n" + hexString);
+                    Console.WriteLine(msg);
                     throw new NotSupportedException(msg);
             }
         }
@@ -138,10 +137,20 @@ namespace Proxel.Protocol.Server
             }
             Console.WriteLine($"HandleLoginRequestAsync >> User: {userName} UUID: {userUuid}"); // TODO: Fix UUID parsing error in 1.12.2 (different packet scheme?)
 
-            using (var builder = new PacketBuilder(networkStream))
+            using (var builder = new PacketBuilder(networkStream)) // Login Success
             {
-
+                builder.SetPacketID(0x02);
+                builder.WriteUuid(userUuid);
+                builder.WriteString(userName);
+                builder.WriteVarInt(2);
+                builder.Send();
             }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await Stop();
+            GC.SuppressFinalize(this);
         }
     }
 }

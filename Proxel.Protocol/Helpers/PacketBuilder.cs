@@ -61,7 +61,31 @@ namespace Proxel.Protocol.Helpers
             WriteVarInt(stringBytes.Length); // Write length of string
             _writer.Write(stringBytes); // Write the string
         }
+        public void WriteUuid(string uuid)
+        {
+            if (string.IsNullOrEmpty(uuid))
+            {
+                throw new ArgumentNullException(nameof(uuid));
+            }
+            string uuidClean = uuid.Replace("-", "").ToLowerInvariant();
+            if (uuidClean.Length != 32)
+            {
+                throw new ArgumentException("Invalid UUID format.");
+            }
 
+            // Parse the UUID string into bytes
+            byte[] uuidBytes = new byte[16];
+            for (int i = 0; i < 16; i++)
+            {
+                uuidBytes[i] = Convert.ToByte(uuidClean.Substring(i * 2, 2), 16);
+            }
+
+            ulong mostSigBits = BitConverter.ToUInt64(uuidBytes, 0);
+            ulong leastSigBits = BitConverter.ToUInt64(uuidBytes, 8);
+
+            _writer.Write(BitConverter.GetBytes(mostSigBits)); // Write the most significant bits (8 bytes) to the stream
+            _writer.Write(BitConverter.GetBytes(leastSigBits)); // Write the least significant bits (8 bytes) to the stream
+        }
         public void WriteVarInt(int value)
         {
             while ((value & -128) != 0)
@@ -71,7 +95,6 @@ namespace Proxel.Protocol.Helpers
             }
             _writer.Write((byte)value);
         }
-
         public void WriteVarLong(long value)
         {
             while ((value & -128L) != 0L)
@@ -113,7 +136,7 @@ namespace Proxel.Protocol.Helpers
             _networkStream.Write(packetBytes, 0, packetBytes.Length);
         }
 
-        public void Dispose()
+        public void DisposeAsync()
         {
             _writer?.Dispose();
             _memoryStream?.Dispose();
