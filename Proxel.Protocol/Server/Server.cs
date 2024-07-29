@@ -136,10 +136,9 @@ namespace Proxel.Protocol.Server
                 userName = await FieldReader.ReadStringAsync(reader.BaseStream);
                 userUuid = await FieldReader.ReadUuidAsync(reader.BaseStream);
             }
-            Console.WriteLine("HandleLoginRequestAsync >> LoginRequest data:\n" + "");
-            Console.WriteLine($"HandleLoginRequestAsync >> User: {userName} UUID: {userUuid}");
+            Console.WriteLine($"HandleLoginRequestAsync >> User: {userName} UUID: {userUuid}"); // TODO: Fix UUID parsing error in 1.12.2 (different packet scheme?)
 
-            using (BinaryWriter writer = new(new MemoryStream()))
+            using (var builder = new PacketBuilder(networkStream))
             {
 
             }
