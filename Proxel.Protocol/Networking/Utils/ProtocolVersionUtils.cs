@@ -1,9 +1,9 @@
-﻿using Proxel.Protocol.Enums;
+﻿using System;
 using System.Collections.Generic;
-using System;
 using System.Linq;
+using Proxel.Protocol.Enums;
 
-namespace Proxel.Protocol.Packets.Utils
+namespace Proxel.Protocol.Networking.Utils
 {
     /// <summary>
     /// Provides utility methods for working with the ProtocolVersion enum.

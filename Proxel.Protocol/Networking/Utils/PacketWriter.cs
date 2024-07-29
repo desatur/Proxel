@@ -1,8 +1,9 @@
-﻿using Proxel.Protocol.Helpers;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
+using Proxel.Protocol.Helpers;
+using Proxel.Protocol.Structs;
 
-namespace Proxel.Protocol.Packets.Utils
+namespace Proxel.Protocol.Networking.Utils
 {
     public static class PacketWriter
     {

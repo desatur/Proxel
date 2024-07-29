@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace Proxel.Protocol.Packets.Utils
+namespace Proxel.Protocol.Networking.Utils
 {
     public class PacketBuilder : IDisposable
     {

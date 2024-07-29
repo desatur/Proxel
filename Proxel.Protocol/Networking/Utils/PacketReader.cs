@@ -1,27 +1,12 @@
 ﻿using Proxel.Protocol.Helpers;
+using Proxel.Protocol.Structs;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Proxel.Protocol.Packets
+namespace Proxel.Protocol.Networking.Utils
 {
-    public class Packet
+    public static class PacketReader
     {
-        public int Length
-        {
-            get
-            {
-                return sizeof(int) + (Data != null ? Data.Length : 0);
-            }
-        }
-        public int PacketId { get; set; }
-        public byte[] Data { get; set; }
-
-        public Packet(int packetId, byte[] data)
-        {
-            PacketId = packetId;
-            Data = data;
-        }
-
         public static async Task<Packet> ReadPacketAsync(Stream stream, bool readData = true)
         {
             int length = await VarInt.ReadVarIntAsync(stream);

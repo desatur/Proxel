@@ -1,5 +1,6 @@
 ﻿namespace Proxel.Protocol.Enums
 {
+    // This enum also determines which versions are supported
     public enum ProtocolVersion
     {
         v1_8 = 47,
@@ -58,7 +59,7 @@
         v1_20_2 = 764,
         v1_20_3 = 765,
         v1_20_4 = 765,
-        v1_20_5 = 766,
-        v1_21 = 767
+        v1_20_5 = 766
+        //v1_21 = 767
     }
 }

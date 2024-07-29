@@ -1,14 +1,13 @@
-﻿using System.IO;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using System.Text;
-using Proxel.Protocol.Helpers;
-using Proxel.Protocol.Packets;
-using Proxel.Protocol.Packets.Utils;
 using Proxel.Protocol.Enums;
-using System.Collections.Generic;
+using Proxel.Protocol.Structs;
+using Proxel.Protocol.Helpers;
+using Proxel.Protocol.Networking.Utils;
 
 namespace Proxel.Protocol.Server
 {
@@ -64,7 +63,7 @@ namespace Proxel.Protocol.Server
             Packet packet;
             try
             {
-                packet = await Packet.ReadPacketAsync(stream);
+                packet = await PacketReader.ReadPacketAsync(stream);
             }
             catch (Exception ex)
             {
@@ -92,7 +91,6 @@ namespace Proxel.Protocol.Server
             ushort serverPort = FieldReader.ReadUnsignedShort(packetReader.BaseStream);
             int nextState = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
             Console.WriteLine($"HandleHandshakeAsync >> Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}");
-            await ProtocolCheck(protocolVersion, networkStream);
 
             switch (nextState)
             {
@@ -100,6 +98,7 @@ namespace Proxel.Protocol.Server
                     await HandleStatusRequestAsync(networkStream);
                     break;
                 case 2: // Login
+                    await ProtocolCheck(protocolVersion, networkStream);
                     await HandleLoginRequestAsync(networkStream);
                     break;
                 default:
@@ -116,7 +115,7 @@ namespace Proxel.Protocol.Server
                 {
                     textBuilder.Text = $"Unsupported version! ({protocolVersion})";
                     textBuilder.Bold = true;
-                    //Console.WriteLine($"JSON: {textBuilder.GetFinalJson()}");
+                    Console.WriteLine($"JSON: {textBuilder.GetFinalJson()}");
                     using (var builder = new PacketBuilder(networkStream)) // Disconnect with reason
                     {
                         builder.SetPacketID(0x00);
@@ -136,35 +135,35 @@ namespace Proxel.Protocol.Server
             {
                 Console.WriteLine($"HandleStatusRequestAsync >> Status Request detected!");
             }
-            else return;
+            //else return;
 
-            byte[] status = File.ReadAllBytes(@"D:\testMOTD.txt"); // TODO: Do un-hardcode this, but PLEASE DO NOT use strings :pray:
-
-            Console.WriteLine($"HandleStatusRequestAsync >> statusJson:\n{Encoding.UTF8.GetString(status)}\n--- END ---");
-            await PacketWriter.WriteStringPacketAsync(networkStream, 0x00, status);
-
-            Console.WriteLine($"HandleStatusRequestAsync >> Sent Status");
+            using (var packetBuilder = new PacketBuilder(networkStream))
+            {
+                packetBuilder.SetPacketID(0x00);
+                using (var statusBuilder = new StatusBuilder())
+                {
+                    Console.WriteLine($"Status JSON: {statusBuilder.GetFinalJson()}");
+                    packetBuilder.WriteByteArray(statusBuilder.GetFinalJsonAsByteArray());
+                    await packetBuilder.Send();
+                }
+            }
         }
 
         private static async Task HandleLoginRequestAsync(NetworkStream networkStream)
         {
-            string userName = "";
-            string userUuid = "";
-            byte[] sharedSecret = [];
-
-            Packet userDataPacket = await Packet.ReadPacketAsync(networkStream);
+            Player player;
+            Packet userDataPacket = await PacketReader.ReadPacketAsync(networkStream);
             using (BinaryReader reader = new(new MemoryStream(userDataPacket.Data)))
             {
-                userName = await FieldReader.ReadStringAsync(reader.BaseStream);
-                userUuid = await FieldReader.ReadUuidAsync(reader.BaseStream);
+                player = new(await FieldReader.ReadStringAsync(reader.BaseStream), await FieldReader.ReadUuidAsync(reader.BaseStream)); // Arg1 = userName | Arg2 = userUuid
             }
-            Console.WriteLine($"HandleLoginRequestAsync >> User: {userName} UUID: {userUuid}"); // TODO: Fix UUID parsing error in 1.12.2 (different packet scheme?)
+            Console.WriteLine($"HandleLoginRequestAsync >> User: {player.Name} UUID: {player.UUID}"); // TODO: Fix UUID parsing error in 1.12.2 (different packet scheme?)
 
             using (var builder = new PacketBuilder(networkStream)) // Login Success
             {
                 builder.SetPacketID(0x02);
-                builder.WriteUuid(userUuid);
-                builder.WriteString(userName);
+                builder.WriteUuid(player.UUID);
+                builder.WriteString(player.Name);
                 builder.WriteVarInt(2);
                 await builder.Send();
             }
