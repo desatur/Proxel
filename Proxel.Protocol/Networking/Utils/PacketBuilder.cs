@@ -10,7 +10,7 @@ namespace Proxel.Protocol.Networking.Utils
         private readonly MemoryStream _memoryStream;
         private readonly NetworkStream _networkStream;
         private readonly BinaryWriter _writer;
-        public int PacketId { get; private set; } = 0x00;
+        public byte PacketId { get; private set; } = 0;
 
         public PacketBuilder(NetworkStream networkStream)
         {
@@ -19,7 +19,7 @@ namespace Proxel.Protocol.Networking.Utils
             _writer = new BinaryWriter(_memoryStream);
         }
 
-        public void SetPacketID(int packetId)
+        public void SetPacketID(byte packetId)
         {
             if (packetId < 0 || packetId > 127)
             {
@@ -125,7 +125,7 @@ namespace Proxel.Protocol.Networking.Utils
             using (var finalWriter = new BinaryWriter(finalStream))
             {
                 WriteVarInt(finalWriter, packetLength); // Write the length of the packet
-                finalWriter.Write((byte)PacketId); // Write the Packet ID
+                finalWriter.Write(PacketId); // Write the Packet ID
                 finalWriter.Write(packetData); // Write the packet data
                 return finalStream.ToArray(); // Return the full packet in byte array
             }

@@ -73,7 +73,7 @@ namespace Proxel.Protocol.Server
 
             switch (packet.PacketId)
             {
-                case 0x00: // Handshake
+                case 0: // Handshake (0x00)
                     await HandleHandshakeAsync(packet, stream);
                     break;
                 default:
@@ -86,27 +86,29 @@ namespace Proxel.Protocol.Server
         private static async Task HandleHandshakeAsync(Packet packet, NetworkStream networkStream)
         {
             BinaryReader packetReader = new(new MemoryStream(packet.Data));
-            int protocolVersion = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
+            ushort protocolVersion = (ushort)await VarInt.ReadVarIntAsync(packetReader.BaseStream);
             string serverAddress = await FieldReader.ReadStringAsync(packetReader.BaseStream);
             ushort serverPort = FieldReader.ReadUnsignedShort(packetReader.BaseStream);
-            int nextState = await VarInt.ReadVarIntAsync(packetReader.BaseStream);
+            ushort nextState = (ushort)await VarInt.ReadVarIntAsync(packetReader.BaseStream);
             Console.WriteLine($"HandleHandshakeAsync >> Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}");
 
             switch (nextState)
             {
                 case 1: // Status
                     await HandleStatusRequestAsync(networkStream);
+                    NetworkStreamDisposer.Dispose(networkStream);
                     break;
                 case 2: // Login
                     await ProtocolCheck(protocolVersion, networkStream);
                     await HandleLoginRequestAsync(networkStream);
+                    NetworkStreamDisposer.Dispose(networkStream);
                     break;
                 default:
                     throw new NotSupportedException($"Unsupported next state: {nextState}");
             }
         }
 
-        private static async Task ProtocolCheck(int protocolVersion, NetworkStream networkStream)
+        private static async Task ProtocolCheck(ushort protocolVersion, NetworkStream networkStream)
         {
             List<ProtocolVersion> protocolVersions = ProtocolVersionUtils.GetProtocolVersion(protocolVersion);
             if (protocolVersions == null || protocolVersions.Count == 0)
@@ -129,8 +131,8 @@ namespace Proxel.Protocol.Server
         private static async Task HandleStatusRequestAsync(NetworkStream networkStream)
         {
             // Status Request from client
-            int length = await VarInt.ReadVarIntAsync(networkStream); // Should be 1
-            int packetId = await VarInt.ReadVarIntAsync(networkStream); // Should be 0
+            ushort length = (ushort)await VarInt.ReadVarIntAsync(networkStream); // Should be 1
+            ushort packetId = (ushort)await VarInt.ReadVarIntAsync(networkStream); // Should be 0
             if (length == 1 && packetId == 0)
             {
                 Console.WriteLine($"HandleStatusRequestAsync >> Status Request detected!");

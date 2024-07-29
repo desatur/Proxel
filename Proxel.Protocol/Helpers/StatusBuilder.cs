@@ -8,7 +8,7 @@ namespace Proxel.Protocol.Helpers
     public class StatusBuilder : IDisposable
     {
         public string VersionName { get; set; } = "Proxel";
-        public int Protocol { get; set; } = 767;
+        public ushort Protocol { get; set; } = 767;
         public int MaxPlayers { get; set; } = 1337;
         public int OnlinePlayers { get; set; } = 0;
         public string MOTD { get; set; } = "{\"text\": \"A Proxel Proxy\"}";

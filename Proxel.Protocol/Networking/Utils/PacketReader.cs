@@ -10,7 +10,7 @@ namespace Proxel.Protocol.Networking.Utils
         public static async Task<Packet> ReadPacketAsync(Stream stream, bool readData = true)
         {
             int length = await VarInt.ReadVarIntAsync(stream);
-            int packetId = await VarInt.ReadVarIntAsync(stream);
+            byte packetId = (byte)await VarInt.ReadVarIntAsync(stream);
             byte[] data;
             if (readData)
             {

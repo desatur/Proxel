@@ -23,7 +23,7 @@ namespace Proxel.Protocol.Networking.Utils
             }
         }
 
-        public static async Task WriteCustomPacketAsync(Stream stream, int packetId, byte[] data)
+        public static async Task WriteCustomPacketAsync(Stream stream, byte packetId, byte[] data)
         {
             int packetIdSize = VarInt.GetVarIntSize(packetId);
             int dataSize = data.Length;
