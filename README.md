@@ -9,7 +9,7 @@
  </a>
 ## TODO/Features
 - [x] Work in progress.
-- [ ] Lightweight
+- [x] Lightweight
   - [x] Use all CPU resources
     - [x] Async
     - [ ] SIMD
@@ -19,14 +19,14 @@
       - [ ] Use ParallelFor when possible
       - [ ] Start methods in new thread when possible
   - [x] Low RAM usage
-  - [ ] Ahead Of Time (AOT) Compilation
+  - [ ] ~~Ahead Of Time (AOT) Compilation~~
 - [ ] Packet compression
   - [ ] Zlib
   - [ ] Set Compression packet (S→C)
-- [ ] Handshaking
+- [x] Handshaking
   - [x] Handshake (C→S)
   - [ ] Status (Next State 1)
-  - [ ] Login (Next State 2)
+  - [x] Login (Next State 2)
   - [ ] Transfer (Next State 3)
 - [ ] Login Start (C→S)
 - [ ] Encryption Request (S→C)
@@ -34,11 +34,16 @@
 - [ ] Login Success (S→C)
 - [ ] Login Acknowledged (C→S)
 - [ ] Online mode
-  - [ ] Auth
+  - [ ] Auth (UUID and Nickname verification)
   - [ ] Skins
   - [ ] Capes
   - [ ] UUID transfers between servers
   - [ ] SessionID transfers between servers
   - [ ] Cosmetics transfers between servers
-- [ ] Addon API
-  - [ ] Dependency injection (AOT ?)
+- [ ] Plugin API
+  - [ ] ~~Dependency injection (AOT ?)~~
+  - [ ] Events
+  - [ ] Permission plugin
+  - [ ] Queue system plugin
+  - [ ] Antibot plugin
+  - [ ] Example plugin
