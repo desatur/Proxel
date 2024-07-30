@@ -9,4 +9,9 @@
     <ProjectReference Include="..\Proxel.Common\Proxel.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="API\" />
+    <Folder Include="Events\" />
+  </ItemGroup>
+
 </Project>

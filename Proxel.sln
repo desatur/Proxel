@@ -9,12 +9,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proxel.Protocol", "Proxel.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proxel.Config", "Proxel.Config\Proxel.Config.csproj", "{6EEC4ADB-53F1-4CFC-B6AD-D133DBBDC156}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proxel.Log4Console", "Proxel.Log4Console\Proxel.Log4Console.csproj", "{28FB3924-3E92-4704-B524-425EB471271A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proxel.Log4Console", "Proxel.Log4Console\Proxel.Log4Console.csproj", "{28FB3924-3E92-4704-B524-425EB471271A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E32F9344-1479-47F6-A968-81865B073AD6}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proxel.PluginAPI", "Proxel.PluginAPI\Proxel.PluginAPI.csproj", "{E2801210-A1CE-4064-8CB5-00EEECBD8319}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proxel.Common", "Proxel.Common\Proxel.Common.csproj", "{351293C4-1558-45C6-BDFD-AE51DBB2E692}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +42,14 @@ Global
 		{28FB3924-3E92-4704-B524-425EB471271A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28FB3924-3E92-4704-B524-425EB471271A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28FB3924-3E92-4704-B524-425EB471271A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2801210-A1CE-4064-8CB5-00EEECBD8319}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2801210-A1CE-4064-8CB5-00EEECBD8319}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2801210-A1CE-4064-8CB5-00EEECBD8319}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2801210-A1CE-4064-8CB5-00EEECBD8319}.Release|Any CPU.Build.0 = Release|Any CPU
+		{351293C4-1558-45C6-BDFD-AE51DBB2E692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{351293C4-1558-45C6-BDFD-AE51DBB2E692}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{351293C4-1558-45C6-BDFD-AE51DBB2E692}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{351293C4-1558-45C6-BDFD-AE51DBB2E692}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

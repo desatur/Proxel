@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 using Proxel.Protocol.Enums;
+using Proxel.Protocol.Helpers;
+using Proxel.Protocol.Structs;
 
 namespace Proxel.Protocol.Networking.Utils
 {
@@ -31,7 +35,7 @@ namespace Proxel.Protocol.Networking.Utils
         /// </summary>
         /// <param name="version">The protocol version integer.</param>
         /// <returns>A list of corresponding ProtocolVersion enum values, or null if not found.</returns>
-        public static List<ProtocolVersion>? GetProtocolVersion(int version)
+        public static List<ProtocolVersion> GetProtocolVersion(int version)
         {
             if (protocolVersionMap.TryGetValue(version, out var protocolVersions))
             {
@@ -73,6 +77,28 @@ namespace Proxel.Protocol.Networking.Utils
         public static bool IsProtocolSupported(string versionString)
         {
             return GetProtocolFromVersionString(versionString) != null;
+        }
+
+        internal static async Task<bool> DisconnectIfUnsupportedProtocol(NetworkStream networkStream, Player player, PlayerConnectionInfo playerConnectionInfo)
+        {
+            List<ProtocolVersion> protocolVersions = GetProtocolVersion(playerConnectionInfo.ProtocolVersion);
+            if (protocolVersions == null || protocolVersions.Count == 0)
+            {
+                using (var textBuilder = new TextBuilder()) // Build disconnect text
+                {
+                    textBuilder.Text = $"Unsupported version! ({playerConnectionInfo.ProtocolVersion})";
+                    textBuilder.Bold = true;
+                    using (var builder = new PacketBuilder(networkStream)) // Disconnect with reason
+                    {
+                        builder.SetPacketID(0x00);
+                        builder.WriteString(textBuilder.GetFinalJson());
+                        await builder.Send();
+                    }
+                }
+                //Log.Info("");
+                return true;
+            }
+            else return false;
         }
     }
 }

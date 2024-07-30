@@ -1,14 +1,15 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using Proxel.PluginAPI.Loader;
 using Proxel.Protocol.Server;
 
 namespace Proxel
 {
     public class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main(/*string[] args*/)
         {
-            Server server = new Server(IPAddress.Any);
+            PluginLoader.CreatePath();
+            // IPAddress.Parse(ipString);
+            Server server = new();
             await server.Start();
         }
     }

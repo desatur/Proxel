@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Proxel.Common\Proxel.Common.csproj" />
     <ProjectReference Include="..\Proxel.Log4Console\Proxel.Log4Console.csproj" />
   </ItemGroup>
 
