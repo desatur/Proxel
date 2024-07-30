@@ -8,6 +8,7 @@ using Proxel.Protocol.Enums;
 using Proxel.Protocol.Structs;
 using Proxel.Protocol.Helpers;
 using Proxel.Protocol.Networking.Utils;
+using Proxel.Log4Console;
 
 namespace Proxel.Protocol.Server
 {
@@ -31,7 +32,7 @@ namespace Proxel.Protocol.Server
         {
             _listener.Start();
             Initiated = true;
-            Console.WriteLine($"Server started on {_listener.LocalEndpoint}");
+            Log.Info("Server started on " + _listener.LocalEndpoint, "Server");
             while (true)
             {
                 TcpClient client = await _listener.AcceptTcpClientAsync();
@@ -43,7 +44,7 @@ namespace Proxel.Protocol.Server
         {
             _listener.Stop();
             Initiated = false;
-            Console.WriteLine($"Server running on {_listener.LocalEndpoint} has stopped");
+            Log.Info($"Server running on {_listener.LocalEndpoint} has stopped", "Server");
         }
 
         private static async Task HandleClientAsync(TcpClient client)
@@ -54,7 +55,7 @@ namespace Proxel.Protocol.Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error handling TcpClient: {ex.Message}\n{ex.StackTrace}");
+                Log.Error($"Error handling TcpClient: {ex.Message}", "HandleClientAsync");
             }
         }
 
@@ -67,7 +68,7 @@ namespace Proxel.Protocol.Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error handling client packet: {ex.Message}");
+                Log.Error($"Error handling client packet: {ex.Message}", "HandlePacketAsync");
                 return;
             }
 
@@ -77,9 +78,8 @@ namespace Proxel.Protocol.Server
                     await HandleHandshakeAsync(packet, stream);
                     break;
                 default:
-                    string msg = $"Unsupported packet ID: {packet.PacketId} (HEX: {packet.PacketId:X2})";
-                    Console.WriteLine(msg);
-                    throw new NotSupportedException(msg);
+                    Log.Warn($"Unsupported packet ID: {packet.PacketId} (HEX: {packet.PacketId:X2})");
+                    break;
             }
         }
 
@@ -90,7 +90,7 @@ namespace Proxel.Protocol.Server
             string serverAddress = await FieldReader.ReadStringAsync(packetReader.BaseStream);
             ushort serverPort = FieldReader.ReadUnsignedShort(packetReader.BaseStream);
             ushort nextState = (ushort)await VarInt.ReadVarIntAsync(packetReader.BaseStream);
-            Console.WriteLine($"HandleHandshakeAsync >> Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}");
+            Log.Debug($"Protocol: {protocolVersion} Type: {nextState} Endpoint: {serverAddress}:{serverPort}", "HandleHandshakeAsync");
 
             switch (nextState)
             {
@@ -117,7 +117,7 @@ namespace Proxel.Protocol.Server
                 {
                     textBuilder.Text = $"Unsupported version! ({protocolVersion})";
                     textBuilder.Bold = true;
-                    Console.WriteLine($"JSON: {textBuilder.GetFinalJson()}");
+                    Log.Debug($"JSON: {textBuilder.GetFinalJson()}", "ProtocolCheck");
                     using (var builder = new PacketBuilder(networkStream)) // Disconnect with reason
                     {
                         builder.SetPacketID(0x00);
@@ -135,7 +135,7 @@ namespace Proxel.Protocol.Server
             ushort packetId = (ushort)await VarInt.ReadVarIntAsync(networkStream); // Should be 0
             if (length == 1 && packetId == 0)
             {
-                Console.WriteLine($"HandleStatusRequestAsync >> Status Request detected!");
+                Log.Debug("Status Request detected!", "HandleStatusRequestAsync");
             }
             //else return;
 
@@ -144,7 +144,7 @@ namespace Proxel.Protocol.Server
                 packetBuilder.SetPacketID(0x00);
                 using (var statusBuilder = new StatusBuilder())
                 {
-                    Console.WriteLine($"Status JSON: {statusBuilder.GetFinalJson()}");
+                    Log.Debug($"Status JSON: {statusBuilder.GetFinalJson()}", $"HandleStatusRequestAsync");
                     packetBuilder.WriteByteArray(statusBuilder.GetFinalJsonAsByteArray());
                     await packetBuilder.Send();
                 }
@@ -159,7 +159,8 @@ namespace Proxel.Protocol.Server
             {
                 player = new(await FieldReader.ReadStringAsync(reader.BaseStream), await FieldReader.ReadUuidAsync(reader.BaseStream)); // Arg1 = userName | Arg2 = userUuid
             }
-            Console.WriteLine($"HandleLoginRequestAsync >> User: {player.Name} UUID: {player.UUID}"); // TODO: Fix UUID parsing error in 1.12.2 (different packet scheme?)
+            // TODO: Fix UUID parsing error in 1.12.2 (different packet scheme?)
+            Log.Debug($"User: {player.Name} UUID: {player.UUID}", "Player");
 
             using (var builder = new PacketBuilder(networkStream)) // Login Success
             {
