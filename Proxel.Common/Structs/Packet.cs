@@ -1,9 +1,9 @@
 ﻿namespace Proxel.Protocol.Structs
 {
-    public readonly struct Packet
+    public readonly struct Packet(byte packetId, byte[] data)
     {
-        public byte PacketId { get; }
-        public byte[] Data { get; }
+        public byte PacketId { get; } = packetId;
+        public byte[] Data { get; } = data != null ? (byte[])data.Clone() : null;
 
         public ushort Length
         {
@@ -11,12 +11,6 @@
             {
                 return (ushort)(sizeof(int) + (Data?.Length ?? 0));
             }
-        }
-
-        public Packet(byte packetId, byte[] data)
-        {
-            PacketId = packetId;
-            Data = data != null ? (byte[])data.Clone() : null;
         }
     }
 }

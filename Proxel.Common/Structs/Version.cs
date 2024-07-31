@@ -1,19 +1,11 @@
 ﻿namespace Proxel.Common.Structs
 {
-    public readonly struct Version
+    public readonly struct Version(int major, int minor, int patch, int build)
     {
-        public int Major { get; }
-        public int Minor { get; }
-        public int Patch { get; }
-        public int Build { get; }
-
-        public Version(int major, int minor, int patch, int build)
-        {
-            Major = major;
-            Minor = minor;
-            Patch = patch;
-            Build = build;
-        }
+        public int Major { get; } = major;
+        public int Minor { get; } = minor;
+        public int Patch { get; } = patch;
+        public int Build { get; } = build;
 
         public readonly string ToString(bool includeBuild = false)
         {
