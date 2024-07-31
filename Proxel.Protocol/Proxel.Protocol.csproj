@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Proxel.Common\Proxel.Common.csproj" />
+    <ProjectReference Include="..\Proxel.Config\Proxel.Config.csproj" />
     <ProjectReference Include="..\Proxel.Log4Console\Proxel.Log4Console.csproj" />
   </ItemGroup>
 

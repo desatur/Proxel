@@ -1,13 +1,13 @@
-﻿using Proxel.Log4Console;
+﻿using Proxel.Config;
+using Proxel.Log4Console;
 using Proxel.Protocol.Networking.Utils;
+using Proxel.Protocol.Server.Config;
 using Proxel.Protocol.Structs;
 using System.Net.Sockets;
-using System.Threading.Tasks;
-using System;
 
 namespace Proxel.Protocol.Server
 {
-    public class ClientHandler
+    public class TcpClientHandler
     {
         internal static async Task HandleClientAsync(TcpClient client)
         {

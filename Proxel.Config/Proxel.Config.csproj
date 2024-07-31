@@ -6,15 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ConfigValues\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="YamlDotNet" Version="16.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Proxel.Common\Proxel.Common.csproj" />
+    <ProjectReference Include="..\Proxel.Log4Console\Proxel.Log4Console.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>

@@ -44,7 +44,7 @@ namespace Proxel.Protocol.Server
             while (true)
             {
                 TcpClient client = await _listener.AcceptTcpClientAsync();
-                _ = ClientHandler.HandleClientAsync(client);
+                _ = TcpClientHandler.HandleClientAsync(client);
             }
         }
 
