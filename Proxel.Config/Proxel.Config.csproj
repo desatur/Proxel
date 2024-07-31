@@ -14,8 +14,4 @@
     <ProjectReference Include="..\Proxel.Log4Console\Proxel.Log4Console.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Interfaces\" />
-  </ItemGroup>
-
 </Project>

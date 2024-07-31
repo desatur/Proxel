@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading.Tasks;
+﻿using System.Net.Sockets;
 using Proxel.Log4Console;
 using Proxel.Protocol.Helpers;
 using Proxel.Protocol.Networking.Utils;
@@ -11,7 +8,7 @@ namespace Proxel.Protocol.Server
 {
     public class HandshakeHandler
     {
-        internal static async Task HandleHandshakeAsync(Packet packet, NetworkStream networkStream, TcpClient client)
+        internal static async Task HandleHandshakeAsync(Packet packet, TcpClient client)
         {
             BinaryReader packetReader = new(new MemoryStream(packet.Data));
             PlayerConnectionInfo playerConnectionInfo = new((ushort)await VarInt.ReadVarIntAsync(packetReader.BaseStream), await FieldReader.ReadStringAsync(packetReader.BaseStream), FieldReader.ReadUnsignedShort(packetReader.BaseStream));
@@ -21,12 +18,12 @@ namespace Proxel.Protocol.Server
             switch (nextState)
             {
                 case 1: // Status
-                    await StatusHandler.HandleStatusRequestAsync(networkStream);
-                    NetworkStreamDisposer.Dispose(networkStream);
+                    await StatusHandler.HandleStatusRequestAsync(client.GetStream());
+                    NetworkStreamDisposer.Dispose(client.GetStream());
                     break;
                 case 2: // Login
-                    await LoginHandler.HandleLoginRequestAsync(networkStream, playerConnectionInfo);
-                    NetworkStreamDisposer.Dispose(networkStream);
+                    await LoginHandler.HandleLoginRequestAsync(client.GetStream(), playerConnectionInfo);
+                    NetworkStreamDisposer.Dispose(client.GetStream());
                     break;
                 case 3: // Transfer
                     throw new NotImplementedException();

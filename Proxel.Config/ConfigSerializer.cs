@@ -1,8 +1,4 @@
-﻿using System.Reflection;
-using System.Text;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization;
+﻿using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace Proxel.Config
@@ -26,60 +22,73 @@ namespace Proxel.Config
 
         public T Deserialize<T>(string yaml)
         {
-            return _deserializer.Deserialize<T>(yaml);
+            if (string.IsNullOrWhiteSpace(yaml)) throw new ArgumentException("YAML content cannot be null or empty.", nameof(yaml));
+            try
+            {
+                return _deserializer.Deserialize<T>(yaml);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Deserialization failed.", ex);
+            }
         }
 
         public void DeserializeInto<T>(string yaml, T obj)
         {
-            var tempObj = Deserialize<T>(yaml);
+            if (string.IsNullOrWhiteSpace(yaml)) throw new ArgumentException("YAML content cannot be null or empty.", nameof(yaml));
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            T tempObj = Deserialize<T>(yaml);
             foreach (var prop in typeof(T).GetProperties())
             {
-                var value = prop.GetValue(tempObj);
-                prop.SetValue(obj, value);
+                if (prop.CanRead && prop.CanWrite)
+                {
+                    var value = prop.GetValue(tempObj);
+                    prop.SetValue(obj, value);
+                }
             }
         }
 
         public string Serialize<T>(T obj)
         {
-            var stringBuilder = new StringBuilder();
-            using (var writer = new StringWriter(stringBuilder))
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            try
             {
-                Emitter emitter = new(writer);
-                EmitWithComments(emitter, obj);
+                return _serializer.Serialize(obj);
             }
-            return stringBuilder.ToString();
-        }
-
-        private static void EmitWithComments(IEmitter emitter, object obj)
-        {
-            foreach (var property in obj.GetType().GetProperties())
+            catch (Exception ex)
             {
-                var commentAttribute = property.GetCustomAttribute<CommentAttribute>();
-                if (commentAttribute != null)
-                {
-                    emitter.Emit(new Comment(commentAttribute.Text, false));
-                }
-
-                var value = property.GetValue(obj);
-                emitter.Emit(new MappingStart());
-                emitter.Emit(new Scalar(property.Name));
-                emitter.Emit(new Scalar(value?.ToString() ?? "null"));
-                emitter.Emit(new MappingEnd());
+                throw new InvalidOperationException("Serialization failed.", ex);
             }
         }
 
-        public T LoadFromFile<T>(string filePath)
+        public async Task<T> LoadFromFileAsync<T>(string filePath)
         {
-            Log4Console.Log.Debug(filePath);
-            var yaml = File.ReadAllText(filePath);
-            return Deserialize<T>(yaml);
+            if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+            if (!File.Exists(filePath)) throw new FileNotFoundException("File not found.", filePath);
+            try
+            {
+                var yaml = await File.ReadAllTextAsync(filePath);
+                return Deserialize<T>(yaml);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to load the configuration from file.", ex);
+            }
         }
 
-        public void SaveToFile<T>(T obj, string filePath)
+        public async Task SaveToFileAsync<T>(T obj, string filePath)
         {
-            Log4Console.Log.Debug(filePath);
-            var yaml = Serialize(obj);
-            File.WriteAllText(filePath, yaml);
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+            try
+            {
+                var yaml = Serialize(obj);
+                await File.WriteAllTextAsync(filePath, yaml);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to save the configuration to file.", ex);
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Proxel.Config;
-using Proxel.Log4Console;
+﻿using Proxel.Log4Console;
 using Proxel.Protocol.Networking.Utils;
 using Proxel.Protocol.Server.Config;
 using Proxel.Protocol.Structs;
@@ -9,10 +8,15 @@ namespace Proxel.Protocol.Server
 {
     public class TcpClientHandler
     {
+        internal static TcpClientConfig config { get; private set; } = new TcpClientConfig();
         internal static async Task HandleClientAsync(TcpClient client)
         {
             try
             {
+                client.ReceiveBufferSize = config.ReceiveBufferSize;
+                client.SendBufferSize = config.SendBufferSize;
+                client.ReceiveTimeout = config.ReceiveTimeout;
+                client.SendTimeout = config.SendTimeout;
                 await HandlePacketAsync(client.GetStream(), client);
             }
             catch (Exception ex)
