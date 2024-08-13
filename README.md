@@ -7,6 +7,8 @@
     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=kohakow/Proxel&type=Date" />
   </picture>
  </a>
+## Note
+I am currently not able to work on this project, probably in future I will
 ## TODO/Features
 - [x] Work in progress.
 - [x] Lightweight
