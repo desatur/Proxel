@@ -1,11 +1,10 @@
 ﻿using Proxel.Config;
-using System.ComponentModel;
 
 namespace Proxel.Protocol.Server.Config
 {
-    internal class TcpClientConfig : ConfigBase
+    public class TcpClientConfig : ConfigBase
     {
-        public TcpClientConfig() : base("TcpClient.yaml") { }
+        public TcpClientConfig() : base("TcpClient.yml") { }
 
         public int ReceiveBufferSize { get; set; } = 8192;
         public int SendBufferSize { get; set; } = 8192;

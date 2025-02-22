@@ -8,16 +8,22 @@ namespace Proxel.Protocol.Server
 {
     public class TcpClientHandler
     {
-        internal static TcpClientConfig config { get; private set; } = new TcpClientConfig();
-        internal static async Task HandleClientAsync(TcpClient client)
+        public TcpClientConfig Config { get; private set; }
+
+        public TcpClientHandler()
+        {
+            Config = new TcpClientConfig();
+        }
+
+        internal async Task HandleClientAsync(TcpClient client)
         {
             try
             {
-                client.ReceiveBufferSize = config.ReceiveBufferSize;
-                client.SendBufferSize = config.SendBufferSize;
-                client.ReceiveTimeout = config.ReceiveTimeout;
-                client.SendTimeout = config.SendTimeout;
-                await HandlePacketAsync(client.GetStream(), client);
+                client.ReceiveBufferSize = Config.ReceiveBufferSize;
+                client.SendBufferSize = Config.SendBufferSize;
+                client.ReceiveTimeout = Config.ReceiveTimeout;
+                client.SendTimeout = Config.SendTimeout;
+                await HandlePacketStreamAsync(client);
             }
             catch (Exception ex)
             {
@@ -25,26 +31,26 @@ namespace Proxel.Protocol.Server
             }
         }
 
-        private static async Task HandlePacketAsync(NetworkStream stream, TcpClient client)
+        private static async Task HandlePacketStreamAsync(TcpClient client)
         {
             Packet packet;
             try
             {
-                packet = await PacketReader.ReadPacketAsync(stream);
+                packet = await PacketReader.ReadPacketAsync(client.GetStream());
             }
             catch (Exception ex)
             {
-                Log.Error($"Exception occured while handling packet sent by client: {ex.Message}", "ClientPacketHandler");
+                Log.Error($"Exception occured while handling packet sent by client: {ex.Message}", "HandlePacketStreamAsync");
                 return;
             }
 
             switch (packet.PacketId)
             {
                 case 0: // Handshake (0x00)
-                    await HandshakeHandler.HandleHandshakeAsync(packet, stream, client);
+                    await HandshakeHandler.HandleHandshakeAsync(packet, client);
                     break;
                 default:
-                    Log.Warn($"Unsupported packet ID sent by client: {packet.PacketId} (HEX: {packet.PacketId:X2})", "ClientPacketHandler");
+                    Log.Warn($"Unsupported packet ID sent by client: {packet.PacketId} (HEX: {packet.PacketId:X2})", "HandlePacketStreamAsync");
                     break;
             }
         }

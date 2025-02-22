@@ -1,14 +1,15 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Proxel.Log4Console;
 using Proxel.Protocol.Structs;
 
 namespace Proxel.Protocol.Server
 {
-    public class Server : IAsyncDisposable
+    public class Server : IDisposable
     {
         #region Public
-        public IPAddress TargetIPAddress { get; private set; }
+        public IPAddress ListenerIPAddress { get; private set; }
         public EndPoint ListeningEndpoint { get; private set; }
         public bool Listening { get; private set; }
         public List<Player> Players
@@ -22,43 +23,47 @@ namespace Proxel.Protocol.Server
 
         #region Private/Internal
         private readonly TcpListener _listener;
+        private TcpClientHandler _tcpclienthandler;
         #endregion
 
         public Server(IPAddress ipAddress = null, ushort port = 25565)
         {
             #if DEBUG
-            ipAddress ??= TargetIPAddress = IPAddress.Loopback;
+            ipAddress ??= ListenerIPAddress = IPAddress.Loopback;
             #else
-            ipAddress ??= ListeningIPAddress = IPAddress.Any;
+            ipAddress ??= ListenerIPAddress = IPAddress.Any;
             #endif
-            _listener = new TcpListener(TargetIPAddress, port);
+            _listener = new TcpListener(ListenerIPAddress, port);
+            _tcpclienthandler = new TcpClientHandler();
         }
-        ~Server() { DisposeAsync().AsTask().Wait(); }
 
-        public async Task Start()
+        ~Server() { Dispose(); }
+
+        public void Start()
         {
             _listener.Start();
             Listening = true;
             ListeningEndpoint = _listener.LocalEndpoint;
             Log.Info("Listening on endpoint " + ListeningEndpoint, "TcpListener");
-            while (true)
+
+            while (Listening)
             {
-                TcpClient client = await _listener.AcceptTcpClientAsync();
-                _ = TcpClientHandler.HandleClientAsync(client);
+                TcpClient client = _listener.AcceptTcpClient();
+                _ = Task.Run(() => _tcpclienthandler.HandleClientAsync(client));
             }
         }
 
-        public async Task Stop()
+        public void Stop()
         {
             if (!Listening) throw new Exception("Server is not running.");
-            _listener.Stop();
             Listening = false;
+            _listener.Stop();
             Log.Info($"No longer listening on endpoint {ListeningEndpoint}", "TcpListener");
         }
 
-        public async ValueTask DisposeAsync()
+        public void Dispose()
         {
-            await Stop();
+            Stop();
             GC.SuppressFinalize(this);
         }
     }

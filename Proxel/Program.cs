@@ -5,12 +5,12 @@ namespace Proxel
 {
     public class Program
     {
-        static async Task Main(/*string[] args*/)
+        static void Main(/*string[] args*/)
         {
             PluginLoader.CreatePath();
             // IPAddress.Parse(ipString);
             Server server = new();
-            await server.Start();
+            server.Start();
         }
     }
 }
