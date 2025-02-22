@@ -10,42 +10,14 @@
 ## Note
 I am currently not able to work on this project, probably in future I will
 ## TODO/Features
-- [x] Work in progress.
-- [x] Lightweight
-  - [x] Use all CPU resources
-    - [x] Async
+- [x] Unstable
+- [ ] Lightweight
+  - [ ] Use all CPU resources
+    - [ ] Async
     - [ ] SIMD
       - [ ] ParallelMath
       - [ ] Mathf
     - [ ] Multithreaded
       - [ ] Use ParallelFor when possible
       - [ ] Start methods in new thread when possible
-  - [x] Low RAM usage
-  - [ ] ~~Ahead Of Time (AOT) Compilation~~
-- [ ] Packet compression
-  - [ ] Zlib
-  - [ ] Set Compression packet (S→C)
-- [x] Handshaking
-  - [x] Handshake (C→S)
-  - [ ] Status (Next State 1)
-  - [x] Login (Next State 2)
-  - [ ] Transfer (Next State 3)
-- [ ] Login Start (C→S)
-- [ ] Encryption Request (S→C)
-- [ ] Encryption Response (C→S)
-- [ ] Login Success (S→C)
-- [ ] Login Acknowledged (C→S)
-- [ ] Online mode
-  - [ ] Auth (UUID and Nickname verification)
-  - [ ] Skins
-  - [ ] Capes
-  - [ ] UUID transfers between servers
-  - [ ] SessionID transfers between servers
-  - [ ] Cosmetics transfers between servers
-- [ ] Plugin API
-  - [ ] ~~Dependency injection (AOT ?)~~
-  - [ ] Events
-  - [ ] Permission plugin
-  - [ ] Queue system plugin
-  - [ ] Antibot plugin
-  - [ ] Example plugin
+  - [ ] Low RAM usage
