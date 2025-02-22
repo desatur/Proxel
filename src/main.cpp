@@ -1,12 +1,9 @@
 #include <iostream>
 #include "Log.hpp"
+#include "Config.hpp"
 
 int main(int argc, char** argv) {
     Log::Init();
-    for (size_t i = 0; i < 10000000000; i++)
-    {
-        LOG_INFO("TEST");
-    }
-    
+    Config& config = Config::GetInstance();
     return 0;
 }
