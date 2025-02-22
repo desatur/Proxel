@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(Proxel VERSION 0.1.0 LANGUAGES C CXX)
 
-# spdlog
+include(FetchContent)
 
 set(SPDLOG_VERSION 1.15.1)
-
-include(FetchContent)
 
 FetchContent_Declare(
 	spdlog
