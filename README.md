@@ -1,5 +1,5 @@
 # Proxel
- Another high performance Minecraft Proxy written in .NET, this is a faster and more lightweight replacement for Waterfall/Velocity.
+ Another high performance Minecraft Proxy written in C++20, this is a faster and more lightweight replacement for Waterfall/Velocity.
  <a href="https://star-history.com/#kohakow/Proxel&Date">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kohakow/Proxel&type=Date&theme=dark" />
@@ -7,17 +7,13 @@
     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=kohakow/Proxel&type=Date" />
   </picture>
  </a>
-## Note
-I am currently not able to work on this project, probably in future I will
 ## TODO/Features
 - [x] Unstable
 - [ ] Lightweight
   - [ ] Use all CPU resources
     - [ ] Async
     - [ ] SIMD
-      - [ ] ParallelMath
-      - [ ] Mathf
+      - [ ] Vectorization
     - [ ] Multithreaded
       - [ ] Use ParallelFor when possible
-      - [ ] Start methods in new thread when possible
   - [ ] Low RAM usage
