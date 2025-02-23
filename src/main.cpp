@@ -1,9 +1,10 @@
 #include <iostream>
 #include "Log.hpp"
-#include "Config.hpp"
+#include "ConfigHandler.hpp"
 
 int main(int argc, char** argv) {
     Log::Init();
-    Config& config = Config::GetInstance();
+    LOG_INFO("Starting Proxel " PROXEL_VERSION);
+    ConfigHandler::GetInstance().Load();
     return 0;
 }

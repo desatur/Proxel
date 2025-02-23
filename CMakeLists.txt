@@ -1,5 +1,18 @@
 cmake_minimum_required(VERSION 3.29)
-project(Proxel VERSION 0.1.0 LANGUAGES C CXX)
+project(Proxel VERSION 0.0.0 LANGUAGES C CXX)
+string(TIMESTAMP CURRENT_DATETIME "%Y%m%d_%H%M%S" UTC)
+
+# --- Props ---
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(PROXEL_VERSION "${CURRENT_DATETIME}")
+else()
+    set(PROXEL_VERSION "0.0.0.0001")
+endif()
+
+add_compile_definitions(PROXEL_VERSION="${PROXEL_VERSION}")
+message(STATUS "Proxel Version: ${PROXEL_VERSION}")
+# -------------
+
 
 include(FetchContent)
 

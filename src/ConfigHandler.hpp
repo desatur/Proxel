@@ -2,17 +2,18 @@
 #include <memory>
 #include <yaml-cpp/yaml.h>
 #include <string>
+#include <fstream>
+#include <iostream>
 
-class Config {
+class ConfigHandler {
 public:
-    Config(const std::string& filename = "config.yaml");
     void Load();
     void Save();
+    static ConfigHandler& GetInstance();
     std::shared_ptr<YAML::Node> GetConfigNode();
-    static Config& GetInstance();
-
+    
 private:
     void CreateDefaultConfig();
-    std::string m_filename;
+    static std::unique_ptr<ConfigHandler> instance;
     std::shared_ptr<YAML::Node> m_node;
 };
