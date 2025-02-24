@@ -11,9 +11,8 @@
 - [x] Unstable
 - [ ] Lightweight
   - [ ] Use all CPU resources
-    - [ ] Async
     - [ ] SIMD
       - [ ] Vectorization
     - [ ] Multithreaded
-      - [ ] Use ParallelFor when possible
+      - [ ] std::async
   - [ ] Low RAM usage
